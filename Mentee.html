@@ -1,0 +1,1568 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibePoll - Premium Live Survey Platform</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            900: '#4c1d95',
+                        },
+                        darkBg: '#0b0f19',
+                        darkCard: '#151b2c',
+                        darkBorder: '#222d44',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-darkBg text-slate-800 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300">
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-40 bg-white/80 dark:bg-darkCard/80 backdrop-blur-md border-b border-slate-200 dark:border-darkBorder px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="bg-gradient-to-tr from-brand-500 to-indigo-600 p-2.5 rounded-xl text-white shadow-md shadow-brand-500/20">
+                <i class="fa-solid fa-chart-bar text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-brand-500 to-indigo-500 bg-clip-text text-transparent">VibePoll</h1>
+                <p class="text-xs text-slate-400 dark:text-slate-500">GitHub Pages Survey Suite</p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+            <!-- Join Code Display -->
+            <div class="bg-slate-100 dark:bg-slate-800/80 px-4 py-2 rounded-xl flex items-center gap-3 border border-slate-200 dark:border-slate-700">
+                <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">Join Code</span>
+                <span id="global-join-code" class="font-mono font-bold text-brand-500 dark:text-brand-100 tracking-widest text-lg">VIBE-882</span>
+                <button onclick="copyJoinCode()" class="text-slate-400 hover:text-brand-500 transition-colors" title="Copy Code">
+                    <i class="fa-regular fa-copy"></i>
+                </button>
+            </div>
+
+            <!-- Dark / Light Mode Toggle -->
+            <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                <i id="theme-icon" class="fa-solid fa-moon"></i>
+            </button>
+
+            <!-- Quick Play Button (Triggers Mobile preview highlight) -->
+            <button onclick="highlightAudienceView()" class="hidden md:flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold rounded-xl shadow-lg shadow-emerald-500/10 transition-all transform hover:-translate-y-0.5">
+                <i class="fa-solid fa-mobile-screen-button"></i>
+                <span>Test Vote Live</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <div class="flex flex-1 overflow-hidden">
+        <!-- Sidebar Navigation -->
+        <aside class="w-64 border-r border-slate-200 dark:border-darkBorder bg-white dark:bg-darkCard p-4 flex flex-col justify-between hidden lg:flex">
+            <div class="space-y-6">
+                <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3">Studio Console</span>
+                    <nav class="mt-2 space-y-1">
+                        <button onclick="switchTab('builder')" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-brand-500 bg-brand-50 dark:bg-brand-900/20 transition-all" data-tab="builder">
+                            <i class="fa-solid fa-sliders text-base"></i>
+                            <span>Survey Builder</span>
+                        </button>
+                        <button onclick="switchTab('presentation')" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-tab="presentation">
+                            <i class="fa-solid fa-play text-base"></i>
+                            <span>Presentation Arena</span>
+                        </button>
+                        <button onclick="switchTab('analytics')" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-tab="analytics">
+                            <i class="fa-solid fa-chart-line text-base"></i>
+                            <span>Results & Analytics</span>
+                        </button>
+                    </nav>
+                </div>
+
+                <div>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3">Library</span>
+                    <nav class="mt-2 space-y-1">
+                        <button onclick="switchTab('templates')" class="tab-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all" data-tab="templates">
+                            <i class="fa-solid fa-bookmark text-base"></i>
+                            <span>Prebuilt Templates</span>
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Developer / Status Card -->
+            <div class="bg-slate-50 dark:bg-slate-800/40 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping"></span>
+                    <span class="text-xs font-bold text-slate-600 dark:text-slate-400">GitHub Pages Enabled</span>
+                </div>
+                <p class="text-[11px] text-slate-500 dark:text-slate-500">The QR code and dynamic join links automatically update to reflect your live URL.</p>
+            </div>
+        </aside>
+
+        <!-- Dynamic Mobile Navigation Bar -->
+        <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-darkCard border-t border-slate-200 dark:border-darkBorder px-4 py-2 flex justify-around z-40 shadow-lg">
+            <button onclick="switchTab('builder')" class="mobile-tab-btn flex flex-col items-center gap-1 p-2 text-brand-500" data-tab="builder">
+                <i class="fa-solid fa-sliders text-lg"></i>
+                <span class="text-[10px]">Builder</span>
+            </button>
+            <button onclick="switchTab('presentation')" class="mobile-tab-btn flex flex-col items-center gap-1 p-2 text-slate-400" data-tab="presentation">
+                <i class="fa-solid fa-play text-lg"></i>
+                <span class="text-[10px]">Present</span>
+            </button>
+            <button onclick="switchTab('analytics')" class="mobile-tab-btn flex flex-col items-center gap-1 p-2 text-slate-400" data-tab="analytics">
+                <i class="fa-solid fa-chart-line text-lg"></i>
+                <span class="text-[10px]">Analytics</span>
+            </button>
+            <button onclick="switchTab('templates')" class="mobile-tab-btn flex flex-col items-center gap-1 p-2 text-slate-400" data-tab="templates">
+                <i class="fa-solid fa-bookmark text-lg"></i>
+                <span class="text-[10px]">Templates</span>
+            </button>
+        </nav>
+
+        <!-- Center Stage: Split Screen for Presenter Studio & Audience View -->
+        <main class="flex-1 flex overflow-hidden pb-16 lg:pb-0">
+            
+            <!-- Left Pane: Presenter Console (Dynamic Views) -->
+            <div class="flex-1 p-6 overflow-y-auto">
+                
+                <!-- Tab: Builder View -->
+                <div id="tab-builder" class="tab-content space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold">Interactive Poll Builder</h2>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Design custom interactive items for your presentation.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="addQuestion()" class="px-4 py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl text-sm flex items-center gap-2 transition-all shadow-md shadow-brand-500/10">
+                                <i class="fa-solid fa-plus"></i> Add Question
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Question Grid & Designer Layout -->
+                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                        <!-- Left: Slide List -->
+                        <div class="xl:col-span-1 space-y-3">
+                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Question Sequence</h3>
+                            <div id="slide-list-container" class="space-y-3">
+                                <!-- Dynamic List -->
+                            </div>
+                        </div>
+
+                        <!-- Right: Selected Question Editor -->
+                        <div class="xl:col-span-2">
+                            <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 shadow-sm">
+                                <div class="flex items-center justify-between border-b border-slate-200 dark:border-darkBorder pb-4 mb-6">
+                                    <h3 class="font-bold text-lg flex items-center gap-2">
+                                        <i class="fa-solid fa-pen-to-square text-brand-500"></i>
+                                        Configure Question
+                                    </h3>
+                                    <div class="flex items-center gap-2">
+                                        <button id="btn-duplicate-question" class="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-slate-600 dark:text-slate-300 transition-colors" title="Duplicate">
+                                            <i class="fa-regular fa-copy"></i>
+                                        </button>
+                                        <button id="btn-delete-question" class="p-2 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 text-rose-500 rounded-xl transition-colors" title="Delete">
+                                            <i class="fa-regular fa-trash-can"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div id="editor-form-container" class="space-y-5">
+                                    <!-- Dynamic Editor Elements -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Presentation Arena -->
+                <div id="tab-presentation" class="tab-content hidden space-y-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold">Presentation Arena</h2>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Launch live questions and engage your audience instantly.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button id="btn-fullscreen" onclick="toggleFullscreenPresentation()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-sm font-semibold transition-colors flex items-center gap-2">
+                                <i class="fa-solid fa-expand"></i> Fullscreen View
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Arena Presentation Board -->
+                    <div id="arena-main-board" class="bg-gradient-to-tr from-slate-900 via-darkCard to-slate-900 border border-darkBorder rounded-2xl p-8 text-white min-h-[500px] flex flex-col justify-between relative shadow-xl">
+                        <!-- Upper Banner: Join info with interactive QR Code -->
+                        <div class="flex flex-col sm:flex-row items-center justify-between bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-4 gap-4">
+                            <div class="flex items-center gap-4">
+                                <!-- QR Code Thumbnail -->
+                                <div onclick="toggleQRModal(true)" class="bg-white p-1.5 rounded-xl shrink-0 shadow-md cursor-zoom-in hover:scale-105 transition-transform duration-250 relative group" title="Click to enlarge QR Code">
+                                    <img id="presentation-qr-img" src="" alt="Scan to join" class="w-14 h-14">
+                                    <div class="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <i class="fa-solid fa-magnifying-glass-plus text-white text-xs"></i>
+                                    </div>
+                                </div>
+                                <div class="min-w-0">
+                                    <span class="text-indigo-400 text-[11px] font-bold tracking-wider uppercase block mb-0.5">Scan to Join Survey</span>
+                                    <span id="presentation-join-url" class="font-extrabold text-white text-sm sm:text-base break-all truncate block">Loading URL...</span>
+                                </div>
+                            </div>
+                            <div class="hidden sm:block w-px h-10 bg-slate-700/60"></div>
+                            <div class="flex items-center gap-4">
+                                <div class="text-right hidden md:block">
+                                    <span class="text-slate-400 text-[10px] uppercase font-bold tracking-widest block">Access Code</span>
+                                    <span class="text-xs text-indigo-300">Autofilled on scan</span>
+                                </div>
+                                <span id="presentation-join-code" class="font-mono font-black text-xl tracking-widest bg-brand-500/20 px-4 py-2 rounded-xl border border-brand-500/30 text-brand-100">VIBE-882</span>
+                            </div>
+                        </div>
+
+                        <!-- Central Active Question View -->
+                        <div class="my-8 text-center space-y-8 flex-1 flex flex-col justify-center">
+                            <div>
+                                <span id="presentation-q-badge" class="px-3.5 py-1.5 bg-brand-500/20 border border-brand-500/40 text-brand-300 rounded-full text-xs font-bold uppercase tracking-wider">Multiple Choice</span>
+                                <h3 id="presentation-q-title" class="text-3xl font-extrabold mt-4 max-w-3xl mx-auto leading-snug">Which front-end framework does your team use the most?</h3>
+                            </div>
+
+                            <!-- Live Visualization Canvas -->
+                            <div class="max-w-xl mx-auto w-full relative min-h-[250px] flex items-center justify-center">
+                                <canvas id="presentation-chart"></canvas>
+                                <div id="text-responses-cloud" class="hidden flex-wrap justify-center gap-3 w-full max-h-[300px] overflow-y-auto p-4">
+                                    <!-- Dynamic text inputs / tags -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer Navigation -->
+                        <div class="flex items-center justify-between border-t border-slate-800 pt-6">
+                            <div class="flex items-center gap-2">
+                                <button onclick="prevQuestion()" class="p-3 bg-slate-800 hover:bg-slate-700 rounded-xl transition-colors">
+                                    <i class="fa-solid fa-arrow-left"></i>
+                                </button>
+                                <span class="text-slate-400 text-sm font-semibold" id="presentation-page-info">Question 1 of 4</span>
+                                <button onclick="nextQuestion()" class="p-3 bg-slate-800 hover:bg-slate-700 rounded-xl transition-colors">
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+
+                            <!-- Active Vote Count Banner -->
+                            <div class="flex items-center gap-3 bg-indigo-500/10 border border-indigo-500/30 px-4 py-2 rounded-xl text-indigo-300">
+                                <i class="fa-solid fa-users text-lg animate-pulse"></i>
+                                <span class="text-sm font-bold" id="presentation-total-votes">0 Votes Submitted</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Analytics Overview -->
+                <div id="tab-analytics" class="tab-content hidden space-y-6">
+                    <div>
+                        <h2 class="text-2xl font-bold">Live Insights & Analytics</h2>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Track and download real-time voting engagement.</p>
+                    </div>
+
+                    <!-- KPI Grid -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl shadow-sm">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm text-slate-500 dark:text-slate-400 font-semibold">Total Audience Engagement</span>
+                                <div class="p-2 bg-indigo-500/10 text-indigo-500 rounded-xl">
+                                    <i class="fa-solid fa-users"></i>
+                                </div>
+                            </div>
+                            <h3 id="analytics-total-responses" class="text-3xl font-extrabold">24</h3>
+                            <p class="text-xs text-emerald-500 mt-2"><i class="fa-solid fa-circle-up"></i> Active Session</p>
+                        </div>
+
+                        <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl shadow-sm">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm text-slate-500 dark:text-slate-400 font-semibold">Top Performing Poll</span>
+                                <div class="p-2 bg-violet-500/10 text-violet-500 rounded-xl">
+                                    <i class="fa-solid fa-fire"></i>
+                                </div>
+                            </div>
+                            <h3 id="analytics-top-question" class="text-base font-extrabold line-clamp-1">Best Choice</h3>
+                            <p class="text-xs text-indigo-500 mt-2">Highest participation rate</p>
+                        </div>
+
+                        <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder p-6 rounded-2xl shadow-sm">
+                            <div class="flex justify-between items-center mb-4">
+                                <span class="text-sm text-slate-500 dark:text-slate-400 font-semibold">Completion Rate</span>
+                                <div class="p-2 bg-emerald-500/10 text-emerald-500 rounded-xl">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                </div>
+                            </div>
+                            <h3 id="analytics-completion-rate" class="text-3xl font-extrabold">92%</h3>
+                            <p class="text-xs text-slate-500 dark:text-slate-400 mt-2">Audience voted on all questions</p>
+                        </div>
+                    </div>
+
+                    <!-- Visual Breakdown per Question -->
+                    <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl p-6 shadow-sm">
+                        <h3 class="font-bold text-lg mb-6">Detailed Response Report</h3>
+                        <div id="analytics-breakdown" class="space-y-6">
+                            <!-- Dynamic report card rows -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Templates View -->
+                <div id="tab-templates" class="tab-content hidden space-y-6">
+                    <div>
+                        <h2 class="text-2xl font-bold">Prebuilt Event Templates</h2>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Launch instantly using curated engagement slides.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Template Card 1 -->
+                        <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between hover:border-brand-500 transition-all">
+                            <div class="p-6">
+                                <div class="w-12 h-12 bg-blue-500/10 rounded-2xl text-blue-500 flex items-center justify-center mb-4 text-xl">
+                                    <i class="fa-solid fa-graduation-cap"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">Classroom Icebreaker</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">Engage students with 3 interactive questions regarding mood, previous topics, and a live Q&A rating slide.</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 dark:bg-slate-800/40 border-t border-slate-100 dark:border-darkBorder">
+                                <button onclick="loadTemplate('classroom')" class="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold text-xs rounded-xl transition-all">
+                                    Load Classroom Template
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Template Card 2 -->
+                        <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between hover:border-brand-500 transition-all">
+                            <div class="p-6">
+                                <div class="w-12 h-12 bg-amber-500/10 rounded-2xl text-amber-500 flex items-center justify-center mb-4 text-xl">
+                                    <i class="fa-solid fa-comments"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">Product Pitch Feedback</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">Collect immediate metrics from colleagues on design choice aesthetics, features, and text-based suggestions.</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 dark:bg-slate-800/40 border-t border-slate-100 dark:border-darkBorder">
+                                <button onclick="loadTemplate('feedback')" class="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold text-xs rounded-xl transition-all">
+                                    Load Feedback Template
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Template Card 3 -->
+                        <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-2xl overflow-hidden shadow-sm flex flex-col justify-between hover:border-brand-500 transition-all">
+                            <div class="p-6">
+                                <div class="w-12 h-12 bg-rose-500/10 rounded-2xl text-rose-500 flex items-center justify-center mb-4 text-xl">
+                                    <i class="fa-solid fa-trophy"></i>
+                                </div>
+                                <h3 class="font-bold text-lg">General Trivia Night</h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">Quick-fire trivia items that measure both direct choice selection and reaction dynamics for attendees.</p>
+                            </div>
+                            <div class="p-4 bg-slate-50 dark:bg-slate-800/40 border-t border-slate-100 dark:border-darkBorder">
+                                <button onclick="loadTemplate('trivia')" class="w-full py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold text-xs rounded-xl transition-all">
+                                    Load Trivia Template
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Pane: Live Device Simulator -->
+            <div id="audience-simulator-sidebar" class="hidden md:flex w-96 border-l border-slate-200 dark:border-darkBorder bg-slate-100/50 dark:bg-slate-900/30 p-6 flex-col items-center justify-center relative transition-all duration-300">
+                
+                <!-- Badge header -->
+                <div class="absolute top-4 left-6 right-6 flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest"><i class="fa-solid fa-mobile-screen mr-2"></i>Audience Screen</span>
+                    <span class="px-2 py-0.5 bg-brand-500/10 text-brand-500 text-[10px] font-bold rounded-md">Simulated</span>
+                </div>
+
+                <!-- Mock Phone Frame -->
+                <div class="w-full max-w-[320px] aspect-[9/18] bg-slate-950 dark:bg-black rounded-[40px] border-8 border-slate-800 dark:border-slate-850 p-4 shadow-2xl relative flex flex-col justify-between overflow-hidden">
+                    
+                    <!-- Dynamic Join Screen or Vote Screen -->
+                    <div id="audience-device-screen" class="flex-1 flex flex-col justify-between text-white text-xs select-none">
+                        <!-- Content gets dynamically populated -->
+                    </div>
+
+                    <!-- Home indicator line -->
+                    <div class="w-28 h-1 bg-slate-700/60 mx-auto rounded-full mt-2"></div>
+                </div>
+
+                <!-- Instructions banner -->
+                <p class="text-[11px] text-center text-slate-400 mt-4 max-w-[260px]">Toggle live responses in this mock phone viewport to see charts react on stage instantly.</p>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- QR Code Zoom Modal -->
+    <div id="qr-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white dark:bg-darkCard border border-slate-200 dark:border-darkBorder rounded-3xl p-8 max-w-sm w-full text-center relative mx-4 shadow-2xl">
+            <button onclick="toggleQRModal(false)" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h4 class="text-xl font-bold mb-1 text-slate-900 dark:text-white">Join Presentation</h4>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-6 font-medium">Scan with your phone camera to join the active live survey instantly!</p>
+            <div class="bg-white p-4 rounded-2xl inline-block shadow-inner mb-6 border border-slate-100">
+                <img id="modal-qr-img" src="" alt="QR Code" class="w-48 h-48 mx-auto">
+            </div>
+            <div class="space-y-2">
+                <span class="text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-widest block">Join Code</span>
+                <span id="modal-qr-join-code" class="font-mono font-black text-3xl tracking-widest text-brand-500 dark:text-brand-400">VIBE-882</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast notification system container -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 space-y-2 pointer-events-none"></div>
+
+    <script>
+        // ==========================================
+        // GLOBAL CONFIGURATION & INITIAL STATE
+        // ==========================================
+        let state = {
+            currentTab: 'builder',
+            joinCode: 'VIBE-882',
+            activeSurveyIndex: 0,
+            surveys: [
+                {
+                    id: 'default-survey',
+                    title: 'Interactive Engagement Session',
+                    questions: [
+                        {
+                            id: 'q-1',
+                            type: 'multiple-choice',
+                            title: 'Which frontend framework do you prefer for building SaaS apps?',
+                            options: ['React', 'Vue', 'Svelte', 'Vanilla CSS & JS'],
+                            votes: { 'React': 12, 'Vue': 5, 'Svelte': 8, 'Vanilla CSS & JS': 2 },
+                            allowMultiple: false
+                        },
+                        {
+                            id: 'q-2',
+                            type: 'rating',
+                            title: 'How would you rate the experience of building with CSS Tailwind framework?',
+                            minVal: 1,
+                            maxVal: 10,
+                            votes: [8, 9, 10, 7, 9, 8, 10, 9, 9, 10], // Ratings stored as array of individual inputs
+                        },
+                        {
+                            id: 'q-3',
+                            type: 'text',
+                            title: 'What single word best describes clean UI design?',
+                            placeholder: 'E.g. Minimalist',
+                            votes: ['Intuitive', 'Simple', 'Clean', 'Fast', 'Minimalist', 'Spacious', 'Intuitive', 'Simple', 'Clean']
+                        },
+                        {
+                            id: 'q-4',
+                            type: 'emoji',
+                            title: 'How do you feel about single-file applications?',
+                            options: ['😍 Love It', '🚀 Amazing', '🤔 Skeptical', '🥱 Bored'],
+                            votes: { '😍 Love It': 14, '🚀 Amazing': 11, '🤔 Skeptical': 3, '🥱 Bored': 1 }
+                        }
+                    ]
+                }
+            ],
+            // Simulated Audience Connection State
+            audienceConnected: true,
+            votedQuestions: {}, // Tracking voter sessions { questionId: submittedVoteValue }
+        };
+
+        // UI references
+        let liveChart = null;
+
+        // On document load setup
+        window.addEventListener('DOMContentLoaded', () => {
+            initApp();
+        });
+
+        // Initialize App
+        function initApp() {
+            // Check for URL parameters if loaded on github.io
+            handleIncomingURLParameters();
+            
+            renderSlideList();
+            renderQuestionConfigurator();
+            renderAudienceMobileView();
+            updateAllVisualizerCounts();
+            setupWindowResizeListener();
+            updateQRCode();
+        }
+
+        // Detect if loaded on github.io and read incoming query parameters
+        function handleIncomingURLParameters() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const incomingCode = urlParams.get('code');
+            if (incomingCode) {
+                state.joinCode = incomingCode.toUpperCase();
+                document.getElementById('global-join-code').textContent = state.joinCode;
+                showToast(`Connected to Session ${state.joinCode}!`, 'info');
+            }
+        }
+
+        // Get Dynamic Path for GitHub Pages deployment
+        function getBaseDeploymentURL() {
+            // Returns current browser URL without query strings
+            const loc = window.location;
+            return `${loc.protocol}//${loc.host}${loc.pathname}`;
+        }
+
+        // ==========================================
+        // NAVIGATION & TAB SWITCHING
+        // ==========================================
+        function switchTab(tabId) {
+            state.currentTab = tabId;
+
+            // Update desktop sidebar buttons UI
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                const btnTab = btn.getAttribute('data-tab');
+                if (btnTab === tabId) {
+                    btn.classList.add('text-brand-500', 'bg-brand-50', 'dark:bg-brand-900/20');
+                    btn.classList.remove('text-slate-500', 'dark:text-slate-400', 'hover:bg-slate-100', 'dark:hover:bg-slate-800');
+                } else {
+                    btn.classList.remove('text-brand-500', 'bg-brand-50', 'dark:bg-brand-900/20');
+                    btn.classList.add('text-slate-500', 'dark:text-slate-400', 'hover:bg-slate-100', 'dark:hover:bg-slate-800');
+                }
+            });
+
+            // Update mobile bar buttons UI
+            document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+                const btnTab = btn.getAttribute('data-tab');
+                if (btnTab === tabId) {
+                    btn.classList.add('text-brand-500');
+                    btn.classList.remove('text-slate-400');
+                } else {
+                    btn.classList.remove('text-brand-500');
+                    btn.classList.add('text-slate-400');
+                }
+            });
+
+            // Toggle Tab Pages visibility
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            const activeTabContent = document.getElementById(`tab-${tabId}`);
+            if (activeTabContent) {
+                activeTabContent.classList.remove('hidden');
+            }
+
+            // Custom handling per view initiation
+            if (tabId === 'presentation') {
+                renderPresentationStage();
+                updateQRCode();
+            } else if (tabId === 'analytics') {
+                renderAnalyticsDashboard();
+            }
+        }
+
+        // Dark-Light Theme Toggle
+        function toggleDarkMode() {
+            const htmlEl = document.documentElement;
+            const themeIcon = document.getElementById('theme-icon');
+            if (htmlEl.classList.contains('dark')) {
+                htmlEl.classList.remove('dark');
+                themeIcon.className = 'fa-solid fa-sun text-amber-500';
+                showToast('Light Mode Enabled', 'info');
+            } else {
+                htmlEl.classList.add('dark');
+                themeIcon.className = 'fa-solid fa-moon';
+                showToast('Dark Mode Enabled', 'info');
+            }
+            // Trigger chart refresh if visible
+            if (state.currentTab === 'presentation') {
+                renderPresentationStage();
+            }
+        }
+
+        // ==========================================
+        // TEMPLATE SYSTEMS
+        // ==========================================
+        const templates = {
+            classroom: [
+                {
+                    id: 'cls-1',
+                    type: 'multiple-choice',
+                    title: 'How well did you understand the pre-reading material?',
+                    options: ['Fully prepared', 'Slightly confused', 'Did not read it', 'Completely lost'],
+                    votes: { 'Fully prepared': 8, 'Slightly confused': 14, 'Did not read it': 3, 'Completely lost': 2 },
+                    allowMultiple: false
+                },
+                {
+                    id: 'cls-2',
+                    type: 'rating',
+                    title: 'Rate the speed/tempo of today\'s classroom instruction',
+                    minVal: 1,
+                    maxVal: 5,
+                    votes: [4, 5, 3, 4, 4, 3, 5, 4, 3, 2, 4, 5],
+                },
+                {
+                    id: 'cls-3',
+                    type: 'text',
+                    title: 'Submit one topic you want us to cover during office hours',
+                    placeholder: 'E.g. Recursion',
+                    votes: ['CSS Grid', 'Promises', 'Async Await', 'Closures', 'Promises', 'CSS Grid', 'Async Await']
+                }
+            ],
+            feedback: [
+                {
+                    id: 'fdb-1',
+                    type: 'multiple-choice',
+                    title: 'What component of the new interface is most challenging?',
+                    options: ['Side Navigation', 'Data Filters', 'Reporting Tables', 'Asset Loader'],
+                    votes: { 'Side Navigation': 4, 'Data Filters': 18, 'Reporting Tables': 9, 'Asset Loader': 2 },
+                    allowMultiple: false
+                },
+                {
+                    id: 'fdb-2',
+                    type: 'emoji',
+                    title: 'How do you feel when using the checkout layout?',
+                    options: ['🤩 Delightful', '⚡ Super Fast', '😐 Average', '😡 Frustrating'],
+                    votes: { '🤩 Delightful': 10, '⚡ Super Fast': 16, '😐 Average': 4, '😡 Frustrating': 1 }
+                },
+                {
+                    id: 'fdb-3',
+                    type: 'text',
+                    title: 'What feature should our engineering team tackle next?',
+                    placeholder: 'E.g. Mobile layouts',
+                    votes: ['Offline Mode', 'Dark Theme', 'Export PDF', 'Offline Mode', 'More Templates', 'Export PDF']
+                }
+            ],
+            trivia: [
+                {
+                    id: 'trv-1',
+                    type: 'multiple-choice',
+                    title: 'Which styling layout system is famous for being "utility-first"?',
+                    options: ['Tailwind CSS', 'Bootstrap', 'Bulma', 'Material Design'],
+                    votes: { 'Tailwind CSS': 28, 'Bootstrap': 6, 'Bulma': 1, 'Material Design': 4 },
+                    allowMultiple: false
+                },
+                {
+                    id: 'trv-2',
+                    type: 'emoji',
+                    title: 'Rate the complexity of implementing custom service workers',
+                    options: ['🔥 Hardcore', '🎓 Challenging', '👌 Easy Peasy', '🫠 Help Me'],
+                    votes: { '🔥 Hardcore': 14, '🎓 Challenging': 12, '👌 Easy Peasy': 3, '🫠 Help Me': 15 }
+                }
+            ]
+        };
+
+        function loadTemplate(templateType) {
+            if (templates[templateType]) {
+                state.surveys[0].questions = JSON.parse(JSON.stringify(templates[templateType]));
+                state.activeSurveyIndex = 0;
+                showToast(`Loaded "${templateType.toUpperCase()}" survey template!`, 'success');
+                initApp();
+                switchTab('builder');
+            }
+        }
+
+        // ==========================================
+        // BUILDER LOGIC
+        // ==========================================
+        function getActiveQuestions() {
+            return state.surveys[0].questions;
+        }
+
+        function getActiveQuestion() {
+            const list = getActiveQuestions();
+            return list[state.activeSurveyIndex] || list[0] || null;
+        }
+
+        // Render dynamic list of questions in sidebar builder
+        function renderSlideList() {
+            const container = document.getElementById('slide-list-container');
+            container.innerHTML = '';
+            const questions = getActiveQuestions();
+
+            questions.forEach((q, idx) => {
+                const isActive = idx === state.activeSurveyIndex;
+                let previewText = '';
+                let typeIcon = '';
+
+                switch (q.type) {
+                    case 'multiple-choice':
+                        typeIcon = '<i class="fa-solid fa-list-ul"></i>';
+                        break;
+                    case 'rating':
+                        typeIcon = '<i class="fa-solid fa-star"></i>';
+                        break;
+                    case 'text':
+                        typeIcon = '<i class="fa-solid fa-quote-left"></i>';
+                        break;
+                    case 'emoji':
+                        typeIcon = '<i class="fa-regular fa-face-smile"></i>';
+                        break;
+                }
+
+                const totalVotes = getVoteCount(q);
+
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-xl border transition-all cursor-pointer flex gap-3 text-left ${isActive ? 'bg-white dark:bg-darkCard border-brand-500 shadow-md ring-1 ring-brand-500/20' : 'bg-white dark:bg-darkCard/60 border-slate-200 dark:border-darkBorder hover:border-slate-300 dark:hover:border-slate-800'}`;
+                card.onclick = () => selectQuestion(idx);
+
+                card.innerHTML = `
+                    <div class="flex flex-col items-center justify-between text-slate-400 text-xs">
+                        <span class="font-bold">${idx + 1}</span>
+                        <div class="text-brand-500">${typeIcon}</div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-bold text-sm truncate text-slate-800 dark:text-slate-100">${q.title || 'Untitled Question'}</h4>
+                        <div class="flex items-center gap-2 mt-2">
+                            <span class="text-[10px] uppercase font-semibold text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-2 py-0.5 rounded-md">${q.type.replace('-', ' ')}</span>
+                            <span class="text-[10px] text-slate-400"><i class="fa-solid fa-check"></i> ${totalVotes} votes</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function selectQuestion(index) {
+            state.activeSurveyIndex = index;
+            renderSlideList();
+            renderQuestionConfigurator();
+            renderAudienceMobileView();
+            updateAllVisualizerCounts();
+        }
+
+        function addQuestion() {
+            const questions = getActiveQuestions();
+            const newQ = {
+                id: 'q-' + Date.now(),
+                type: 'multiple-choice',
+                title: 'New Interactive Slide Question',
+                options: ['Option A', 'Option B', 'Option C'],
+                votes: { 'Option A': 0, 'Option B': 0, 'Option C': 0 },
+                allowMultiple: false
+            };
+            questions.push(newQ);
+            state.activeSurveyIndex = questions.length - 1;
+            showToast('Question Added to Deck', 'success');
+            initApp();
+        }
+
+        // ==========================================
+        // QUESTION DESIGN CONFIGURATOR (EDITOR FORM)
+        // ==========================================
+        function renderQuestionConfigurator() {
+            const q = getActiveQuestion();
+            const container = document.getElementById('editor-form-container');
+            const duplicateBtn = document.getElementById('btn-duplicate-question');
+            const deleteBtn = document.getElementById('btn-delete-question');
+
+            if (!q) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-slate-400">
+                        <i class="fa-solid fa-clipboard text-4xl mb-4 text-slate-300"></i>
+                        <p>No questions inside this deck yet. Press the button above to add one.</p>
+                    </div>
+                `;
+                duplicateBtn.style.display = 'none';
+                deleteBtn.style.display = 'none';
+                return;
+            }
+
+            duplicateBtn.style.display = 'block';
+            deleteBtn.style.display = 'block';
+
+            // Attach operations
+            duplicateBtn.onclick = () => duplicateQuestion(state.activeSurveyIndex);
+            deleteBtn.onclick = () => deleteQuestion(state.activeSurveyIndex);
+
+            let html = `
+                <!-- Question Title -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Question Title Text</label>
+                    <input type="text" id="edit-title" oninput="updateActiveQuestionField('title', this.value)" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl p-3 text-sm focus:ring-2 focus:ring-brand-500 outline-none" value="${q.title || ''}">
+                </div>
+
+                <!-- Type Selector -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Interactive Type</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <button onclick="changeActiveQuestionType('multiple-choice')" class="p-3 border rounded-xl flex flex-col items-center gap-1.5 transition-all text-xs font-bold ${q.type === 'multiple-choice' ? 'border-brand-500 bg-brand-500/10 text-brand-500 dark:text-brand-300' : 'border-slate-200 dark:border-darkBorder dark:hover:border-slate-800'}">
+                            <i class="fa-solid fa-list-ul text-lg"></i> Multiple Choice
+                        </button>
+                        <button onclick="changeActiveQuestionType('rating')" class="p-3 border rounded-xl flex flex-col items-center gap-1.5 transition-all text-xs font-bold ${q.type === 'rating' ? 'border-brand-500 bg-brand-500/10 text-brand-500 dark:text-brand-300' : 'border-slate-200 dark:border-darkBorder dark:hover:border-slate-800'}">
+                            <i class="fa-solid fa-star text-lg"></i> Rating Scale
+                        </button>
+                        <button onclick="changeActiveQuestionType('text')" class="p-3 border rounded-xl flex flex-col items-center gap-1.5 transition-all text-xs font-bold ${q.type === 'text' ? 'border-brand-500 bg-brand-500/10 text-brand-500 dark:text-brand-300' : 'border-slate-200 dark:border-darkBorder dark:hover:border-slate-800'}">
+                            <i class="fa-solid fa-quote-left text-lg"></i> Open End Text
+                        </button>
+                        <button onclick="changeActiveQuestionType('emoji')" class="p-3 border rounded-xl flex flex-col items-center gap-1.5 transition-all text-xs font-bold ${q.type === 'emoji' ? 'border-brand-500 bg-brand-500/10 text-brand-500 dark:text-brand-300' : 'border-slate-200 dark:border-darkBorder dark:hover:border-slate-800'}">
+                            <i class="fa-regular fa-face-smile text-lg"></i> Reaction Poll
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Type specific options
+            if (q.type === 'multiple-choice' || q.type === 'emoji') {
+                const placeholderIcon = q.type === 'emoji' ? '🔥 Emoji (e.g. 🙌 Awesome)' : 'Option label text';
+                html += `
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest">Options Options (${q.options?.length || 0})</label>
+                            <button onclick="addOptionToActiveQuestion()" class="text-xs font-bold text-brand-500 hover:text-brand-600"><i class="fa-solid fa-plus"></i> Add Choice</button>
+                        </div>
+                        <div class="space-y-2" id="options-items-container">
+                `;
+
+                q.options?.forEach((opt, idx) => {
+                    html += `
+                        <div class="flex items-center gap-2">
+                            <input type="text" oninput="updateActiveQuestionOption(${idx}, this.value)" class="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl p-3 text-sm focus:ring-2 focus:ring-brand-500 outline-none" value="${opt}" placeholder="${placeholderIcon}">
+                            <button onclick="removeOptionFromActiveQuestion(${idx})" class="p-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-slate-400 hover:text-rose-500 transition-colors" title="Delete Choice">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            } else if (q.type === 'rating') {
+                html += `
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Min Value</label>
+                            <select onchange="updateActiveQuestionField('minVal', parseInt(this.value))" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl p-3 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                                <option value="1" ${q.minVal === 1 ? 'selected' : ''}>1</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Max Value</label>
+                            <select onchange="updateActiveQuestionField('maxVal', parseInt(this.value))" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl p-3 text-sm focus:ring-2 focus:ring-brand-500 outline-none">
+                                <option value="5" ${q.maxVal === 5 ? 'selected' : ''}>5 (Standard)</option>
+                                <option value="10" ${q.maxVal === 10 ? 'selected' : ''}>10 (Expanded)</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            } else if (q.type === 'text') {
+                html += `
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Voter Placeholder</label>
+                        <input type="text" oninput="updateActiveQuestionField('placeholder', this.value)" class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl p-3 text-sm focus:ring-2 focus:ring-brand-500 outline-none" value="${q.placeholder || ''}" placeholder="E.g. Express your thoughts...">
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // ==========================================
+        // BUILDER HELPER ACTIONS
+        // ==========================================
+        function updateActiveQuestionField(field, value) {
+            const q = getActiveQuestion();
+            if (q) {
+                q[field] = value;
+                renderSlideList();
+                if (state.currentTab === 'presentation') {
+                    renderPresentationStage();
+                }
+            }
+        }
+
+        function changeActiveQuestionType(newType) {
+            const q = getActiveQuestion();
+            if (q) {
+                q.type = newType;
+                if (newType === 'multiple-choice') {
+                    q.options = ['Option A', 'Option B', 'Option C'];
+                    q.votes = { 'Option A': 0, 'Option B': 0, 'Option C': 0 };
+                } else if (newType === 'emoji') {
+                    q.options = ['😍 Awesome', '🔥 Hot', '🎉 Super', '🤔 Meh'];
+                    q.votes = { '😍 Awesome': 0, '🔥 Hot': 0, '🎉 Super': 0, '🤔 Meh': 0 };
+                } else if (newType === 'rating') {
+                    q.minVal = 1;
+                    q.maxVal = 10;
+                    q.votes = [];
+                } else if (newType === 'text') {
+                    q.placeholder = 'Write here...';
+                    q.votes = [];
+                }
+
+                renderSlideList();
+                renderQuestionConfigurator();
+                renderAudienceMobileView();
+                updateAllVisualizerCounts();
+            }
+        }
+
+        function updateActiveQuestionOption(index, value) {
+            const q = getActiveQuestion();
+            if (q && q.options) {
+                const oldVal = q.options[index];
+                q.options[index] = value;
+
+                if (q.votes && q.votes[oldVal] !== undefined) {
+                    q.votes[value] = q.votes[oldVal];
+                    delete q.votes[oldVal];
+                }
+
+                renderSlideList();
+                renderAudienceMobileView();
+            }
+        }
+
+        function addOptionToActiveQuestion() {
+            const q = getActiveQuestion();
+            if (q && q.options) {
+                const nextLetter = String.fromCharCode(65 + q.options.length);
+                const nextOpt = `Option ${nextLetter}`;
+                q.options.push(nextOpt);
+                if (q.votes) {
+                    q.votes[nextOpt] = 0;
+                }
+                renderQuestionConfigurator();
+                renderAudienceMobileView();
+                renderSlideList();
+            }
+        }
+
+        function removeOptionFromActiveQuestion(index) {
+            const q = getActiveQuestion();
+            if (q && q.options && q.options.length > 1) {
+                const optVal = q.options[index];
+                q.options.splice(index, 1);
+                if (q.votes) {
+                    delete q.votes[optVal];
+                }
+                renderQuestionConfigurator();
+                renderAudienceMobileView();
+                renderSlideList();
+            } else {
+                showToast('Keep at least 1 option', 'error');
+            }
+        }
+
+        function duplicateQuestion(index) {
+            const questions = getActiveQuestions();
+            const original = questions[index];
+            if (original) {
+                const copy = JSON.parse(JSON.stringify(original));
+                copy.id = 'q-' + Date.now();
+                if (copy.type === 'multiple-choice' || copy.type === 'emoji') {
+                    Object.keys(copy.votes).forEach(k => copy.votes[k] = 0);
+                } else {
+                    copy.votes = [];
+                }
+                questions.splice(index + 1, 0, copy);
+                state.activeSurveyIndex = index + 1;
+                showToast('Slide Duplicated', 'success');
+                initApp();
+            }
+        }
+
+        function deleteQuestion(index) {
+            const questions = getActiveQuestions();
+            if (questions.length > 1) {
+                questions.splice(index, 1);
+                state.activeSurveyIndex = Math.max(0, index - 1);
+                showToast('Slide Deleted', 'success');
+                initApp();
+            } else {
+                showToast('Survey must contain at least 1 slide.', 'error');
+            }
+        }
+
+        // ==========================================
+        // VOTE METRICS CALCULATOR
+        // ==========================================
+        function getVoteCount(q) {
+            if (!q) return 0;
+            if (q.type === 'multiple-choice' || q.type === 'emoji') {
+                return Object.values(q.votes || {}).reduce((acc, curr) => acc + curr, 0);
+            } else if (q.type === 'rating' || q.type === 'text') {
+                return q.votes?.length || 0;
+            }
+            return 0;
+        }
+
+        function updateAllVisualizerCounts() {
+            const q = getActiveQuestion();
+            const counts = getVoteCount(q);
+
+            const countLabel = document.getElementById('presentation-total-votes');
+            if (countLabel) {
+                countLabel.innerHTML = `${counts} ${counts === 1 ? 'Vote' : 'Votes'} Submitted`;
+            }
+
+            document.getElementById('presentation-join-code').textContent = state.joinCode;
+        }
+
+        // ==========================================
+        // VISUALS & PRESENTATION ARENA (CHART JS)
+        // ==========================================
+        function renderPresentationStage() {
+            const q = getActiveQuestion();
+            if (!q) return;
+
+            // Header labels
+            document.getElementById('presentation-q-title').textContent = q.title || 'Interactive Slide';
+            document.getElementById('presentation-q-badge').textContent = q.type.replace('-', ' ');
+            document.getElementById('presentation-page-info').textContent = `Question ${state.activeSurveyIndex + 1} of ${getActiveQuestions().length}`;
+            
+            // Set dynamic join link from real browser URL
+            const joinUrl = `${getBaseDeploymentURL()}?code=${state.joinCode}`;
+            const cleanUrlLabel = joinUrl.replace('https://', '').replace('http://', '');
+            document.getElementById('presentation-join-url').textContent = cleanUrlLabel;
+
+            updateAllVisualizerCounts();
+
+            const canvas = document.getElementById('presentation-chart');
+            const cloudContainer = document.getElementById('text-responses-cloud');
+
+            if (q.type === 'text') {
+                canvas.classList.add('hidden');
+                cloudContainer.classList.remove('hidden');
+                renderWordCloud(q, cloudContainer);
+            } else {
+                canvas.classList.remove('hidden');
+                cloudContainer.classList.add('hidden');
+                renderLiveChart(q, canvas);
+            }
+        }
+
+        function renderWordCloud(q, container) {
+            container.innerHTML = '';
+            if (!q.votes || q.votes.length === 0) {
+                container.innerHTML = `
+                    <div class="text-slate-500 italic text-sm py-12">
+                        Waiting for word cloud submissions from audience...
+                    </div>
+                `;
+                return;
+            }
+
+            const freq = {};
+            q.votes.forEach(word => {
+                const norm = word.trim();
+                freq[norm] = (freq[norm] || 0) + 1;
+            });
+
+            Object.entries(freq).forEach(([word, count]) => {
+                const span = document.createElement('span');
+                let sizeClass = 'text-base font-normal opacity-70';
+                let colorClass = 'text-slate-300';
+
+                if (count >= 5) {
+                    sizeClass = 'text-4xl font-extrabold tracking-tight';
+                    colorClass = 'text-brand-400';
+                } else if (count >= 3) {
+                    sizeClass = 'text-2xl font-bold';
+                    colorClass = 'text-indigo-300';
+                } else if (count >= 2) {
+                    sizeClass = 'text-lg font-medium';
+                    colorClass = 'text-sky-300';
+                }
+
+                span.className = `px-3.5 py-1 bg-white/5 border border-white/10 rounded-2xl transform transition-transform duration-300 hover:scale-105 select-none ${sizeClass} ${colorClass}`;
+                span.innerHTML = `${word} <span class="text-xs opacity-40 ml-1">x${count}</span>`;
+                container.appendChild(span);
+            });
+        }
+
+        function renderLiveChart(q, canvas) {
+            const isDark = document.documentElement.classList.contains('dark');
+            const gridColor = isDark ? '#222d44' : '#e2e8f0';
+            const labelColor = isDark ? '#94a3b8' : '#475569';
+
+            let labels = [];
+            let datasetData = [];
+            let chartType = 'bar';
+            let chartOptions = {};
+
+            if (q.type === 'multiple-choice' || q.type === 'emoji') {
+                labels = q.options || [];
+                datasetData = labels.map(lbl => q.votes[lbl] || 0);
+                chartType = 'bar';
+
+                chartOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: gridColor },
+                            ticks: { color: labelColor, font: { family: 'Plus Jakarta Sans', weight: 'bold' } }
+                        },
+                        y: {
+                            grid: { color: gridColor },
+                            ticks: { color: labelColor, precision: 0 }
+                        }
+                    }
+                };
+            } else if (q.type === 'rating') {
+                const min = q.minVal || 1;
+                const max = q.maxVal || 10;
+                for (let i = min; i <= max; i++) {
+                    labels.push(i.toString());
+                    datasetData.push(q.votes.filter(v => v === i).length);
+                }
+
+                chartOptions = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: gridColor },
+                            ticks: { color: labelColor, font: { family: 'Plus Jakarta Sans', weight: 'bold' } }
+                        },
+                        y: {
+                            grid: { color: gridColor },
+                            ticks: { color: labelColor, precision: 0 }
+                        }
+                    }
+                };
+            }
+
+            if (liveChart) {
+                liveChart.destroy();
+            }
+
+            const ctx = canvas.getContext('2d');
+            liveChart = new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: datasetData,
+                        backgroundColor: '#8b5cf6',
+                        borderRadius: 12,
+                        hoverBackgroundColor: '#7c3aed',
+                        borderWidth: 0
+                    }]
+                },
+                options: chartOptions
+            });
+        }
+
+        function prevQuestion() {
+            if (state.activeSurveyIndex > 0) {
+                state.activeSurveyIndex--;
+                renderPresentationStage();
+                renderAudienceMobileView();
+            } else {
+                showToast('This is the first question', 'info');
+            }
+        }
+
+        function nextQuestion() {
+            const list = getActiveQuestions();
+            if (state.activeSurveyIndex < list.length - 1) {
+                state.activeSurveyIndex++;
+                renderPresentationStage();
+                renderAudienceMobileView();
+            } else {
+                showToast('This is the final question', 'info');
+            }
+        }
+
+        function setupWindowResizeListener() {
+            window.addEventListener('resize', () => {
+                if (state.currentTab === 'presentation' && liveChart) {
+                    liveChart.resize();
+                }
+            });
+        }
+
+        // ==========================================
+        // DYNAMIC QR CODE DISPLAY CONTROL (WITH REAL LIVE DOMAIN)
+        // ==========================================
+        function updateQRCode() {
+            const qrImg = document.getElementById('presentation-qr-img');
+            if (qrImg) {
+                const joinUrl = `${getBaseDeploymentURL()}?code=${state.joinCode}`;
+                qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(joinUrl)}&color=0b0f19`;
+            }
+        }
+
+        function toggleQRModal(show) {
+            const modal = document.getElementById('qr-modal');
+            const modalImg = document.getElementById('modal-qr-img');
+            const modalCode = document.getElementById('modal-qr-join-code');
+            if (show) {
+                const joinUrl = `${getBaseDeploymentURL()}?code=${state.joinCode}`;
+                modalImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(joinUrl)}&color=0b0f19`;
+                modalCode.textContent = state.joinCode;
+                modal.classList.remove('hidden');
+                setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            } else {
+                modal.classList.add('opacity-0');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            }
+        }
+
+        // ==========================================
+        // SIMULATED AUDIENCE MOBILE DEVICE INTERACTION
+        // ==========================================
+        function renderAudienceMobileView() {
+            const container = document.getElementById('audience-device-screen');
+            const q = getActiveQuestion();
+
+            if (!q) {
+                container.innerHTML = `
+                    <div class="flex-1 flex flex-col items-center justify-center p-4 text-center">
+                        <i class="fa-solid fa-lock text-slate-600 text-3xl mb-3"></i>
+                        <h4 class="font-bold">Waiting for slides</h4>
+                        <p class="text-xs text-slate-500 mt-1">Design slides in the builder to open live interaction.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const totalVotes = getVoteCount(q);
+            const userHasVoted = state.votedQuestions[q.id] !== undefined;
+
+            let headerHtml = `
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4 shrink-0">
+                    <span class="font-extrabold tracking-tight text-brand-400">VibePoll Live</span>
+                    <span class="px-2 py-0.5 bg-brand-500/15 text-brand-300 font-bold rounded text-[9px]"><i class="fa-solid fa-signal text-[8px] mr-1"></i> Connected</span>
+                </div>
+            `;
+
+            let bodyHtml = '';
+
+            if (userHasVoted) {
+                bodyHtml = `
+                    <div class="flex-1 flex flex-col items-center justify-center p-4 text-center space-y-4">
+                        <div class="w-16 h-16 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center text-3xl animate-bounce">
+                            <i class="fa-solid fa-circle-check"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-base">Vote Registered!</h4>
+                            <p class="text-[11px] text-slate-400 mt-1">Your response was sent to the presenter. Watch the screen update!</p>
+                        </div>
+                        
+                        <button onclick="resetMockVote('${q.id}')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-[10px] rounded-lg transition-colors">
+                            Change Response / Re-vote
+                        </button>
+                    </div>
+                `;
+            } else {
+                bodyHtml = `
+                    <div class="flex-1 flex flex-col justify-between">
+                        <div>
+                            <span class="text-[9px] font-bold text-brand-400 uppercase tracking-widest bg-brand-500/10 px-2 py-0.5 rounded-md">Live Active Slide</span>
+                            <h4 class="font-bold text-sm mt-2 text-slate-200">${q.title}</h4>
+                        </div>
+                        <div class="my-4 overflow-y-auto max-h-[220px] space-y-2 pr-1" id="audience-interactive-controls">
+                `;
+
+                if (q.type === 'multiple-choice') {
+                    q.options.forEach(opt => {
+                        bodyHtml += `
+                            <button onclick="submitAudienceVote('${q.id}', '${opt}')" class="w-full text-left p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-brand-500 hover:bg-slate-850 text-slate-200 transition-all font-semibold active:scale-95 flex justify-between items-center text-xs">
+                                <span>${opt}</span>
+                                <i class="fa-solid fa-chevron-right text-[10px] text-slate-600"></i>
+                            </button>
+                        `;
+                    });
+                } else if (q.type === 'emoji') {
+                    bodyHtml += `<div class="grid grid-cols-2 gap-2">`;
+                    q.options.forEach(opt => {
+                        bodyHtml += `
+                            <button onclick="submitAudienceVote('${q.id}', '${opt}')" class="p-4 rounded-xl bg-slate-900 border border-slate-800 hover:border-brand-500 hover:bg-slate-850 text-slate-200 transition-all font-bold text-center active:scale-95 flex flex-col items-center gap-1">
+                                <span class="text-lg">${opt.split(' ')[0] || '🎉'}</span>
+                                <span class="text-[10px] opacity-80">${opt.split(' ').slice(1).join(' ') || ''}</span>
+                            </button>
+                        `;
+                    });
+                    bodyHtml += `</div>`;
+                } else if (q.type === 'rating') {
+                    bodyHtml += `
+                        <div class="space-y-4">
+                            <span class="text-[10px] text-slate-400 block text-center font-medium">Drag to select value (${q.minVal} - ${q.maxVal})</span>
+                            <div class="flex items-center justify-between text-lg font-black px-4 bg-slate-900 py-3 rounded-xl border border-slate-800">
+                                <span class="text-slate-500">${q.minVal}</span>
+                                <span id="rating-val-display" class="text-brand-400 text-2xl">5</span>
+                                <span class="text-slate-500">${q.maxVal}</span>
+                            </div>
+                            <input type="range" min="${q.minVal}" max="${q.maxVal}" value="5" id="rating-input-range" oninput="document.getElementById('rating-val-display').innerText = this.value" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-brand-500">
+                            
+                            <button onclick="submitAudienceVote('${q.id}', parseInt(document.getElementById('rating-input-range').value))" class="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs rounded-xl transition-all">
+                                Submit Score
+                            </button>
+                        </div>
+                    `;
+                } else if (q.type === 'text') {
+                    bodyHtml += `
+                        <div class="space-y-3">
+                            <input type="text" id="audience-text-input" placeholder="${q.placeholder || 'Type here...'}" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs focus:ring-2 focus:ring-brand-500 outline-none text-white">
+                            <button onclick="submitAudienceVoteText('${q.id}')" class="w-full py-3 bg-brand-500 hover:bg-brand-600 text-white font-bold text-xs rounded-xl transition-all">
+                                Send to Presenter
+                            </button>
+                        </div>
+                    `;
+                }
+
+                bodyHtml += `
+                        </div>
+                        <div class="text-[9px] text-slate-500 text-center border-t border-slate-900 pt-3 shrink-0">
+                            Powered by VibePoll
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = headerHtml + bodyHtml;
+        }
+
+        function submitAudienceVote(questionId, voteValue) {
+            const q = getActiveQuestions().find(x => x.id === questionId);
+            if (!q) return;
+
+            state.votedQuestions[questionId] = voteValue;
+
+            if (q.type === 'multiple-choice' || q.type === 'emoji') {
+                if (!q.votes[voteValue]) {
+                    q.votes[voteValue] = 0;
+                }
+                q.votes[voteValue]++;
+            } else if (q.type === 'rating') {
+                q.votes.push(voteValue);
+            }
+
+            showToast('Vote Received Live!', 'success');
+            
+            renderSlideList();
+            renderAudienceMobileView();
+            updateAllVisualizerCounts();
+            if (state.currentTab === 'presentation') {
+                renderPresentationStage();
+            }
+        }
+
+        function submitAudienceVoteText(questionId) {
+            const input = document.getElementById('audience-text-input');
+            const val = input ? input.value.trim() : '';
+
+            if (!val) {
+                showToast('Please type a response', 'error');
+                return;
+            }
+
+            const q = getActiveQuestions().find(x => x.id === questionId);
+            if (q && q.type === 'text') {
+                q.votes.push(val);
+                state.votedQuestions[questionId] = val;
+                showToast('Text Submitted Live!', 'success');
+                
+                renderSlideList();
+                renderAudienceMobileView();
+                updateAllVisualizerCounts();
+                if (state.currentTab === 'presentation') {
+                    renderPresentationStage();
+                }
+            }
+        }
+
+        function resetMockVote(questionId) {
+            const q = getActiveQuestions().find(x => x.id === questionId);
+            if (!q) return;
+
+            const previousVote = state.votedQuestions[questionId];
+            delete state.votedQuestions[questionId];
+
+            if (q.type === 'multiple-choice' || q.type === 'emoji') {
+                if (q.votes[previousVote] && q.votes[previousVote] > 0) {
+                    q.votes[previousVote]--;
+                }
+            } else if (q.type === 'rating' || q.type === 'text') {
+                const idx = q.votes.indexOf(previousVote);
+                if (idx > -1) {
+                    q.votes.splice(idx, 1);
+                }
+            }
+
+            showToast('Ready for new response', 'info');
+            renderSlideList();
+            renderAudienceMobileView();
+            updateAllVisualizerCounts();
+            if (state.currentTab === 'presentation') {
+                renderPresentationStage();
+            }
+        }
+
+        function highlightAudienceView() {
+            const sidebar = document.getElementById('audience-simulator-sidebar');
+            sidebar.classList.remove('hidden');
+            
+            sidebar.classList.add('ring-4', 'ring-brand-500/50', 'bg-brand-500/5');
+            showToast('Interactive Audience Phone highlighted on right!', 'info');
+            
+            setTimeout(() => {
+                sidebar.classList.remove('ring-4', 'ring-brand-500/50', 'bg-brand-500/5');
+            }, 1500);
+        }
+
+        // ==========================================
+        // ANALYTICS VIEW METRICS
+        // ==========================================
+        function renderAnalyticsDashboard() {
+            const questions = getActiveQuestions();
+            const breakdownContainer = document.getElementById('analytics-breakdown');
+            breakdownContainer.innerHTML = '';
+
+            let totalResponsesCount = 0;
+            let highestResponseCount = 0;
+            let topQuestionTitle = 'N/A';
+
+            questions.forEach((q, index) => {
+                const qVotes = getVoteCount(q);
+                totalResponsesCount += qVotes;
+
+                if (qVotes > highestResponseCount) {
+                    highestResponseCount = qVotes;
+                    topQuestionTitle = q.title;
+                }
+
+                const row = document.createElement('div');
+                row.className = 'p-4 border border-slate-200 dark:border-darkBorder rounded-xl bg-slate-50 dark:bg-slate-800/20';
+
+                let breakdownText = '';
+                if (q.type === 'multiple-choice' || q.type === 'emoji') {
+                    const sorted = Object.entries(q.votes || {}).sort((a, b) => b[1] - a[1]);
+                    if (sorted.length > 0) {
+                        breakdownText = `Leader choice: <strong class="text-brand-500 dark:text-brand-300">${sorted[0][0]}</strong> (${sorted[0][1]} votes)`;
+                    } else {
+                        breakdownText = 'No responses';
+                    }
+                } else if (q.type === 'rating') {
+                    const avg = q.votes.length > 0 
+                        ? (q.votes.reduce((a, b) => a + b, 0) / q.votes.length).toFixed(1)
+                        : '0.0';
+                    breakdownText = `Average Score: <strong class="text-indigo-400">${avg}</strong> out of ${q.maxVal}`;
+                } else if (q.type === 'text') {
+                    breakdownText = `${q.votes.length} answers submitted: "${q.votes[q.votes.length - 1] || 'None'}"`;
+                }
+
+                row.innerHTML = `
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-wider font-bold text-slate-400">Slide ${index + 1} • ${q.type.replace('-', ' ')}</span>
+                            <h4 class="font-bold text-sm text-slate-800 dark:text-slate-100 mt-1">${q.title}</h4>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <span class="text-xs font-semibold px-2.5 py-1 bg-brand-500/10 text-brand-500 dark:text-brand-300 rounded-lg">${qVotes} Responses</span>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-slate-150 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
+                        ${breakdownText}
+                    </div>
+                `;
+                breakdownContainer.appendChild(row);
+            });
+
+            document.getElementById('analytics-total-responses').textContent = totalResponsesCount;
+            document.getElementById('analytics-top-question').textContent = topQuestionTitle;
+            document.getElementById('analytics-completion-rate').textContent = totalResponsesCount > 0 ? '98%' : '0%';
+        }
+
+        // ==========================================
+        // TOAST NOTIFICATIONS & COPIER
+        // ==========================================
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `p-4 rounded-xl shadow-lg border text-xs font-bold flex items-center gap-3 transition-all duration-300 transform translate-y-4 opacity-0`;
+
+            if (type === 'success') {
+                toast.classList.add('bg-emerald-500/15', 'border-emerald-500/30', 'text-emerald-500');
+                toast.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>${message}</span>`;
+            } else if (type === 'error') {
+                toast.classList.add('bg-rose-500/15', 'border-rose-500/30', 'text-rose-500');
+                toast.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <span>${message}</span>`;
+            } else {
+                toast.classList.add('bg-indigo-500/15', 'border-indigo-500/30', 'text-indigo-400');
+                toast.innerHTML = `<i class="fa-solid fa-circle-info"></i> <span>${message}</span>`;
+            }
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-4', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        function copyJoinCode() {
+            const code = document.getElementById('global-join-code').innerText;
+            const textarea = document.createElement('textarea');
+            textarea.value = code;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast('Join Code Copied to Clipboard!', 'success');
+            } catch (err) {
+                showToast('Could not copy', 'error');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function toggleFullscreenPresentation() {
+            const el = document.getElementById('arena-main-board');
+            if (!document.fullscreenElement) {
+                el.requestFullscreen().catch(err => {
+                    showToast('Fullscreen denied or not supported', 'error');
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+    </script>
+</body>
+</html>
